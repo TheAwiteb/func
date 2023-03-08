@@ -5,6 +5,7 @@ edition = "2021"
 authors = ["utsho"]
 
 [dependencies]
+rustyline = { version = "11.0.0", default-features = false, features = ["with-file-history"] }
 
 [profile.release]
 opt-level = 3
