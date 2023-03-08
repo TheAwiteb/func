@@ -1,18 +1,20 @@
-use std::io::stdin;
+use std::cmp::Ordering;
 
 use crate::common::{
     ast::{
-        AssignmentStatement, BinaryExpression, BlockExpression, BuiltinFunction,
-        BuiltinFunctionStatement, CallExpression, ElseBlock, Expression, FunctionStatement,
-        GroupExpression, IdentifierExpression, IfExpression, LetStatement, Program, Statement,
-        UnaryExpression,
+        AssignmentStatement, BinaryExpression, BlockExpression, CallExpression, ElseBlock,
+        Expression, FunctionStatement, GroupExpression, IdentifierExpression, IfExpression,
+        LetStatement, Program, Statement, UnaryExpression,
     },
     error::{Error, ErrorType},
     object::{Meta, Object},
     token::TokenType,
 };
 
-use super::environment::{FunctionBindings, VariableBindings};
+use super::{
+    builtin::Builtin,
+    environment::{FunctionBindings, VariableBindings},
+};
 
 #[derive(Default)]
 pub struct Interpreter {
@@ -42,10 +44,6 @@ impl Interpreter {
 
             Statement::Function(function_statement) => {
                 self.define_function_statement(function_statement)
-            }
-
-            Statement::BuiltinFunction(builtin_function_statement) => {
-                self.execute_builtin_function_statement(builtin_function_statement)
             }
 
             Statement::Expression(expression) => self.evaluate_expression(expression),
@@ -93,60 +91,21 @@ impl Interpreter {
             let value = self.evaluate_expression(argument.clone())?;
             self.variables.declare(identifier.clone(), value);
         }
-        let return_value = self.evaluate_block_expression(function_statement.block)?;
+        let return_value = if let Some(block_expression) = function_statement.block {
+            self.evaluate_block_expression(block_expression)?
+        } else {
+            // If there is no block expression, that means the function is built-in.
+            Builtin::try_from(function_statement.identifier.clone())?.execute(
+                arguments
+                    .iter()
+                    .map(|expression| self.evaluate_expression(expression.clone()))
+                    .collect::<Result<Vec<_>, _>>()?,
+                function_statement.identifier.position,
+            )?
+        };
 
         self.variables = old_variables;
         Ok(return_value)
-    }
-
-    fn execute_builtin_function_statement(
-        &mut self,
-        builtin_function_statement: BuiltinFunctionStatement,
-    ) -> Result<Object, Error> {
-        match builtin_function_statement.builtin_function {
-            BuiltinFunction::Read => {
-                let identifier = match builtin_function_statement.arguments[0].clone() {
-                    Expression::Identifier(identifier) => identifier.identifier,
-                    _ => panic!(), // We're never reaching this because we're 'eating' identifier token in parser.
-                };
-                let mut value = String::new();
-                stdin().read_line(&mut value).unwrap();
-                self.variables.assign(
-                    identifier,
-                    Object::String(value.trim().to_string(), Meta::default()),
-                )?;
-            }
-
-            BuiltinFunction::Write => {
-                for argument in builtin_function_statement.arguments {
-                    print!("{}", self.evaluate_expression(argument)?);
-                }
-            }
-
-            BuiltinFunction::Push => {
-                let identifier = match builtin_function_statement.arguments[1].clone() {
-                    Expression::Identifier(identifier) => identifier.identifier,
-                    _ => panic!(), // We're never reaching this because we're 'eating' identifier token in parser.
-                };
-                let object =
-                    self.evaluate_expression(builtin_function_statement.arguments[0].clone())?;
-                let mut array = self.variables.get(identifier.clone())?;
-                self.variables
-                    .assign(identifier.clone(), array.push(object, identifier.position)?)?;
-            }
-
-            BuiltinFunction::Pop => {
-                let identifier = match builtin_function_statement.arguments[0].clone() {
-                    Expression::Identifier(identifier) => identifier.identifier,
-                    _ => panic!(), // We're never reaching this because we're 'eating' identifier token in parser.
-                };
-                let mut array = self.variables.get(identifier.clone())?;
-                self.variables
-                    .assign(identifier.clone(), array.pop(identifier.position)?)?;
-            }
-        }
-
-        Ok(Object::Nil(Meta::default()))
     }
 
     fn evaluate_if_expression(&mut self, if_statement: IfExpression) -> Result<Object, Error> {
@@ -639,16 +598,41 @@ impl Interpreter {
         call_expression: CallExpression,
     ) -> Result<Object, Error> {
         let function_statement = self.functions.get(call_expression.identifier.clone())?;
-        let paramiters = function_statement.paramiters.len();
+        let paramiters = function_statement.paramiters.clone();
         let arguments = call_expression.arguments.len();
-        if paramiters != arguments {
-            return Err(Error::new(
-                ErrorType::RuntimeError,
-                format!("Expected {} arguments, got {}", paramiters, arguments),
-                call_expression.identifier.position,
-            ));
-        } else {
-            self.execute_function_statement(call_expression.arguments, function_statement)
+        match arguments.cmp(&paramiters.len()) {
+            Ordering::Less => {
+                return Err(Error::new(
+                    ErrorType::RuntimeError,
+                    format!(
+                        "The `{}` expected {} arguments but got {}. Missing arguments are {}",
+                        call_expression.identifier.lexeme,
+                        paramiters.len(),
+                        arguments,
+                        paramiters[arguments..]
+                            .iter()
+                            .map(|p| format!("`{}`", p.lexeme))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    ),
+                    call_expression.identifier.position,
+                ))
+            }
+            Ordering::Greater => {
+                return Err(Error::new(
+                    ErrorType::RuntimeError,
+                    format!(
+                        "too many arguments passed to `{}`. Expected {} but got {}",
+                        call_expression.identifier.lexeme,
+                        paramiters.len(),
+                        arguments
+                    ),
+                    call_expression.identifier.position,
+                ))
+            }
+            Ordering::Equal => {
+                self.execute_function_statement(call_expression.arguments, function_statement)
+            }
         }
     }
 

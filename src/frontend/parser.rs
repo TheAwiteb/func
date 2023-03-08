@@ -1,9 +1,8 @@
 use crate::common::{
     ast::{
-        ArrayExpression, AssignmentStatement, BinaryExpression, BlockExpression, BuiltinFunction,
-        BuiltinFunctionStatement, CallExpression, ElseBlock, Expression, FunctionStatement,
-        GroupExpression, IdentifierExpression, IfExpression, LetStatement, LiteralExpression,
-        Program, Statement, UnaryExpression,
+        ArrayExpression, AssignmentStatement, BinaryExpression, BlockExpression, CallExpression,
+        ElseBlock, Expression, FunctionStatement, GroupExpression, IdentifierExpression,
+        IfExpression, LetStatement, LiteralExpression, Program, Statement, UnaryExpression,
     },
     error::{Error, ErrorType},
     object::{Meta, Object},
@@ -82,16 +81,7 @@ impl Parser {
                 self.block_expression()?,
             ))),
             current_ttype => {
-                if self.does_match(&[
-                    TokenType::Read,
-                    TokenType::Write,
-                    TokenType::Push,
-                    TokenType::Pop,
-                ]) {
-                    Ok(Statement::BuiltinFunction(
-                        self.builtin_function_statement()?,
-                    ))
-                } else if current_ttype == TokenType::Identifier
+                if current_ttype == TokenType::Identifier
                     && self.peek_next().ttype == TokenType::Equal
                 {
                     Ok(Statement::Assignment(self.assignment_statement()?))
@@ -148,66 +138,7 @@ impl Parser {
         self.eat(TokenType::CloseParen)?;
         let block = self.block_expression()?;
 
-        Ok(FunctionStatement::new(identifier, paramiters, block, false))
-    }
-
-    fn builtin_function_statement(&mut self) -> Result<BuiltinFunctionStatement, Error> {
-        let func_type = self.next_token().ttype;
-
-        self.eat(TokenType::OpenParen)?;
-
-        let builtin_func = match func_type {
-            TokenType::Read => {
-                let identifier = self.eat(TokenType::Identifier)?;
-                BuiltinFunctionStatement::new(
-                    BuiltinFunction::Read,
-                    vec![Expression::Identifier(IdentifierExpression::new(
-                        identifier,
-                    ))],
-                )
-            }
-
-            TokenType::Write => {
-                let mut arguments = Vec::new();
-                loop {
-                    arguments.push(self.expression()?);
-                    if self.does_match(&[TokenType::Comma]) {
-                        self.advance();
-                    } else {
-                        break;
-                    }
-                }
-                BuiltinFunctionStatement::new(BuiltinFunction::Write, arguments)
-            }
-
-            TokenType::Push => {
-                let expression = self.expression()?;
-                self.eat(TokenType::Comma)?;
-                let identifier = self.eat(TokenType::Identifier)?;
-                BuiltinFunctionStatement::new(
-                    BuiltinFunction::Push,
-                    vec![
-                        expression,
-                        Expression::Identifier(IdentifierExpression::new(identifier)),
-                    ],
-                )
-            }
-
-            TokenType::Pop => {
-                let identifier = self.eat(TokenType::Identifier)?;
-                BuiltinFunctionStatement::new(
-                    BuiltinFunction::Pop,
-                    vec![Expression::Identifier(IdentifierExpression::new(
-                        identifier,
-                    ))],
-                )
-            }
-
-            _ => panic!(), // We're never reaching this because we've already filtered token type.
-        };
-
-        self.eat(TokenType::CloseParen)?;
-        Ok(builtin_func)
+        Ok(FunctionStatement::new(identifier, paramiters, Some(block)))
     }
 
     fn if_expression(&mut self) -> Result<IfExpression, Error> {

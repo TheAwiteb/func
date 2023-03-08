@@ -7,6 +7,8 @@ use crate::common::{
     token::Token,
 };
 
+use super::builtin::Builtin;
+
 #[derive(Debug, Clone, Default)]
 pub struct VariableBindings {
     bindings: HashMap<String, Object>,
@@ -43,7 +45,7 @@ impl VariableBindings {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct FunctionBindings {
     bindings: HashMap<String, FunctionStatement>,
 }
@@ -62,6 +64,17 @@ impl FunctionBindings {
                 format!("Function `{}` doesn't exist.", identifier.lexeme),
                 identifier.position,
             ))
+        }
+    }
+}
+
+impl Default for FunctionBindings {
+    fn default() -> Self {
+        Self {
+            bindings: Builtin::init()
+                .iter()
+                .map(|f| (f.identifier.lexeme.clone(), f.clone()))
+                .collect(),
         }
     }
 }

@@ -44,11 +44,6 @@ impl Lexer {
         self.keywords
             .insert("false".to_string(), TokenType::Boolean);
         self.keywords.insert("nil".to_string(), TokenType::Nil);
-
-        self.keywords.insert("read".to_string(), TokenType::Read);
-        self.keywords.insert("write".to_string(), TokenType::Write);
-        self.keywords.insert("push".to_string(), TokenType::Push);
-        self.keywords.insert("pop".to_string(), TokenType::Pop);
     }
 
     pub fn lex(&mut self) -> Result<Vec<Token>, Error> {

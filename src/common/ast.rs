@@ -7,17 +7,8 @@ pub enum Statement {
     Let(LetStatement),
     Assignment(AssignmentStatement),
     Function(FunctionStatement),
-    BuiltinFunction(BuiltinFunctionStatement),
     Return(Expression),
     Expression(Expression),
-}
-
-#[derive(Debug, Clone)]
-pub enum BuiltinFunction {
-    Read,
-    Write,
-    Push,
-    Pop,
 }
 
 #[derive(Debug, Clone)]
@@ -90,41 +81,20 @@ impl IfExpression {
     }
 }
 
+/// A function statement. The block will be None if the function is a builtin function.
 #[derive(Debug, Clone)]
 pub struct FunctionStatement {
     pub identifier: Token,
     pub paramiters: Vec<Token>,
-    pub block: BlockExpression,
-    pub is_builtin: bool,
+    pub block: Option<BlockExpression>,
 }
 
 impl FunctionStatement {
-    pub fn new(
-        identifier: Token,
-        paramiters: Vec<Token>,
-        block: BlockExpression,
-        is_builtin: bool,
-    ) -> Self {
+    pub fn new(identifier: Token, paramiters: Vec<Token>, block: Option<BlockExpression>) -> Self {
         Self {
             identifier,
             paramiters,
             block,
-            is_builtin,
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct BuiltinFunctionStatement {
-    pub builtin_function: BuiltinFunction,
-    pub arguments: Vec<Expression>,
-}
-
-impl BuiltinFunctionStatement {
-    pub fn new(builtin_function: BuiltinFunction, arguments: Vec<Expression>) -> Self {
-        Self {
-            builtin_function,
-            arguments,
         }
     }
 }

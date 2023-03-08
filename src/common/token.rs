@@ -42,11 +42,6 @@ pub enum TokenType {
     Else,
     Return,
 
-    Read,
-    Write,
-    Push,
-    Pop,
-
     EOF,
 }
 
@@ -90,11 +85,6 @@ impl Display for TokenType {
             Self::If => write!(f, "if"),
             Self::Else => write!(f, "else"),
             Self::Return => write!(f, "return"),
-
-            Self::Read => write!(f, "read"),
-            Self::Write => write!(f, "write"),
-            Self::Push => write!(f, "push"),
-            Self::Pop => write!(f, "pop"),
 
             Self::EOF => write!(f, "\0"),
         }
