@@ -69,11 +69,13 @@ impl Object {
         }
     }
 
-    pub fn is_truthy(&self) -> bool {
+    pub fn is_true(&self) -> bool {
         match self {
-            Self::Boolean(boolean, ..) => boolean.clone(),
+            Self::Boolean(boolean, ..) => *boolean,
             Self::Nil(..) => false,
-            _ => true,
+            Self::Array(array, ..) => !array.is_empty(),
+            Self::Number(number, ..) => *number != 0.0,
+            Self::String(string, ..) => !string.is_empty(),
         }
     }
 

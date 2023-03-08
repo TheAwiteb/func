@@ -151,7 +151,7 @@ impl Interpreter {
 
     fn evaluate_if_expression(&mut self, if_statement: IfExpression) -> Result<Object, Error> {
         let condition = self.evaluate_expression(*if_statement.condition)?;
-        if condition.is_truthy() {
+        if condition.is_true() {
             self.evaluate_block_expression(if_statement.if_block)
         } else if let Some(else_block) = *if_statement.else_block {
             match else_block {
@@ -198,12 +198,12 @@ impl Interpreter {
 
         match binary_expression.operator.ttype {
             TokenType::And => Ok(Object::Boolean(
-                left.is_truthy() && right.is_truthy(),
+                left.is_true() && right.is_true(),
                 Meta::default(),
             )),
 
             TokenType::Or => Ok(Object::Boolean(
-                left.is_truthy() || right.is_truthy(),
+                left.is_true() || right.is_true(),
                 Meta::default(),
             )),
 
@@ -573,7 +573,7 @@ impl Interpreter {
         let right = self.match_expression(*unary_expression.right)?;
 
         match unary_expression.operator.ttype {
-            TokenType::Not => Ok(Object::Boolean(!right.is_truthy(), Meta::default())),
+            TokenType::Not => Ok(Object::Boolean(!right.is_true(), Meta::default())),
 
             TokenType::Minus => match right {
                 Object::Number(x, ..) => Ok(Object::Number(x * -1., Meta::default())),
