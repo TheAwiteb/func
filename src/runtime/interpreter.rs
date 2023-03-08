@@ -14,6 +14,7 @@ use crate::common::{
 
 use super::environment::{FunctionBindings, VariableBindings};
 
+#[derive(Default)]
 pub struct Interpreter {
     variables: VariableBindings,
     functions: FunctionBindings,
@@ -21,10 +22,7 @@ pub struct Interpreter {
 
 impl Interpreter {
     pub fn new() -> Self {
-        Self {
-            variables: VariableBindings::new(),
-            functions: FunctionBindings::new(),
-        }
+        Self::default()
     }
 
     pub fn interpret(&mut self, program: Program) -> Result<(), Error> {
@@ -91,10 +89,9 @@ impl Interpreter {
     ) -> Result<Object, Error> {
         let old_variables = self.variables.clone();
 
-        for index in 0..arguments.len() {
-            let identifier = function_statement.paramiters[index].clone();
-            let value = self.evaluate_expression(arguments[index].clone())?;
-            self.variables.declare(identifier, value);
+        for (identifier, argument) in function_statement.paramiters.iter().zip(arguments.iter()) {
+            let value = self.evaluate_expression(argument.clone())?;
+            self.variables.declare(identifier.clone(), value);
         }
         let return_value = self.evaluate_block_expression(function_statement.block)?;
 
