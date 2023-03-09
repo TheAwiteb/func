@@ -2,7 +2,8 @@ use crate::common::{
     ast::{
         ArrayExpression, AssignmentStatement, BinaryExpression, BlockExpression, CallExpression,
         ElseBlock, Expression, FunctionStatement, GroupExpression, IdentifierExpression,
-        IfExpression, LetStatement, LiteralExpression, Program, Statement, UnaryExpression,
+        IfExpression, LetStatement, LiteralExpression, Parameter, Program, Statement,
+        UnaryExpression,
     },
     error::{Error, ErrorType},
     object::{Meta, Object},
@@ -127,7 +128,7 @@ impl Parser {
         self.eat(TokenType::OpenParen)?;
         if !self.does_match(&[TokenType::CloseParen]) && !self.eof() {
             loop {
-                paramiters.push(self.eat(TokenType::Identifier)?);
+                paramiters.push(Parameter::new(self.eat(TokenType::Identifier)?));
                 if self.does_match(&[TokenType::Comma]) {
                     self.advance();
                 } else {

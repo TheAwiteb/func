@@ -81,16 +81,31 @@ impl IfExpression {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Parameter {
+    pub identifier: Token,
+}
+
+impl Parameter {
+    pub fn new(identifier: Token) -> Self {
+        Self { identifier }
+    }
+}
+
 /// A function statement. The block will be None if the function is a builtin function.
 #[derive(Debug, Clone)]
 pub struct FunctionStatement {
     pub identifier: Token,
-    pub paramiters: Vec<Token>,
+    pub paramiters: Vec<Parameter>,
     pub block: Option<BlockExpression>,
 }
 
 impl FunctionStatement {
-    pub fn new(identifier: Token, paramiters: Vec<Token>, block: Option<BlockExpression>) -> Self {
+    pub fn new(
+        identifier: Token,
+        paramiters: Vec<Parameter>,
+        block: Option<BlockExpression>,
+    ) -> Self {
         Self {
             identifier,
             paramiters,

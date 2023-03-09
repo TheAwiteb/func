@@ -87,9 +87,9 @@ impl Interpreter {
     ) -> Result<Object, Error> {
         let old_variables = self.variables.clone();
 
-        for (identifier, argument) in function_statement.paramiters.iter().zip(arguments.iter()) {
+        for (param, argument) in function_statement.paramiters.iter().zip(arguments.iter()) {
             let value = self.evaluate_expression(argument.clone())?;
-            self.variables.declare(identifier.clone(), value);
+            self.variables.declare(param.identifier.clone(), value);
         }
         let return_value = if let Some(block_expression) = function_statement.block {
             self.evaluate_block_expression(block_expression)?
@@ -611,7 +611,7 @@ impl Interpreter {
                         arguments,
                         paramiters[arguments..]
                             .iter()
-                            .map(|p| format!("`{}`", p.lexeme))
+                            .map(|p| format!("`{}`", p.identifier.lexeme))
                             .collect::<Vec<_>>()
                             .join(", ")
                     ),
