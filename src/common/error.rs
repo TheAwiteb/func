@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter, Result};
 
 use super::position::Position;
 
+#[derive(Debug, Clone)]
 pub enum ErrorType {
     LexingError,
     ParsingError,
@@ -18,6 +19,7 @@ impl Display for ErrorType {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Error {
     e_type: ErrorType,
     message: String,
