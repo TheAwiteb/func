@@ -86,7 +86,6 @@ impl Interpreter {
         function_statement: FunctionStatement,
     ) -> Result<Object, Error> {
         let old_variables = self.variables.clone();
-
         for (param, argument) in function_statement.paramiters.iter().zip(arguments.iter()) {
             let value = self.evaluate_expression(argument.clone())?;
             self.variables.declare(param.identifier.clone(), value);
@@ -599,8 +598,8 @@ impl Interpreter {
     ) -> Result<Object, Error> {
         let function_statement = self.functions.get(call_expression.identifier.clone())?;
         let paramiters = function_statement.paramiters.clone();
-        let arguments = call_expression.arguments.len();
-        match arguments.cmp(&paramiters.len()) {
+        let arguments_length = call_expression.arguments.len();
+        match arguments_length.cmp(&paramiters.len()) {
             Ordering::Less => {
                 return Err(Error::new(
                     ErrorType::RuntimeError,
@@ -608,8 +607,8 @@ impl Interpreter {
                         "The `{}` expected {} arguments but got {}. Missing arguments are {}",
                         call_expression.identifier.lexeme,
                         paramiters.len(),
-                        arguments,
-                        paramiters[arguments..]
+                        arguments_length,
+                        paramiters[arguments_length..]
                             .iter()
                             .map(|p| format!("`{}`", p.identifier.lexeme))
                             .collect::<Vec<_>>()
@@ -625,7 +624,7 @@ impl Interpreter {
                         "too many arguments passed to `{}`. Expected {} but got {}",
                         call_expression.identifier.lexeme,
                         paramiters.len(),
-                        arguments
+                        arguments_length
                     ),
                     call_expression.identifier.position,
                 ))
@@ -676,6 +675,8 @@ impl Interpreter {
                 for object in array_expression.objects {
                     if let Some(object) = object.literal {
                         objects.push(object)
+                    } else if matches!(object.ttype, TokenType::Identifier) {
+                        objects.push(self.variables.get(object)?)
                     }
                 }
                 Ok(Object::Array(objects, Meta::default()))
