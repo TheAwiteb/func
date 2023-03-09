@@ -128,7 +128,7 @@ impl Parser {
         self.eat(TokenType::OpenParen)?;
         if !self.does_match(&[TokenType::CloseParen]) && !self.eof() {
             loop {
-                paramiters.push(Parameter::new(self.eat(TokenType::Identifier)?));
+                paramiters.push(Parameter::new(self.eat(TokenType::Identifier)?, false));
                 if self.does_match(&[TokenType::Comma]) {
                     self.advance();
                 } else {

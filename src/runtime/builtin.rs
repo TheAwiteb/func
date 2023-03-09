@@ -23,75 +23,108 @@ impl Builtin {
     /// Returns the number of parameters the builtin function takes.
     pub fn parameters(&self) -> Vec<Parameter> {
         match self {
-            Self::Len => vec![Parameter::new(Token::new(
-                TokenType::Identifier,
-                "value".to_string(),
-                None,
-                Position::new("builtin".to_string(), 0),
-            ))],
-            Self::First => vec![Parameter::new(Token::new(
-                TokenType::Identifier,
-                "value".to_string(),
-                None,
-                Position::new("builtin".to_string(), 0),
-            ))],
-            Self::Last => vec![Parameter::new(Token::new(
-                TokenType::Identifier,
-                "value".to_string(),
-                None,
-                Position::new("builtin".to_string(), 0),
-            ))],
-            Self::Write => vec![Parameter::new(Token::new(
-                TokenType::Identifier,
-                "value".to_string(),
-                None,
-                Position::new("builtin".to_string(), 0),
-            ))],
-            Self::Format => vec![
-                Parameter::new(Token::new(
-                    TokenType::Identifier,
-                    "format".to_string(),
-                    None,
-                    Position::new("builtin".to_string(), 0),
-                )),
-                Parameter::new(Token::new(
-                    TokenType::Identifier,
-                    "args".to_string(),
-                    None,
-                    Position::new("builtin".to_string(), 0),
-                )),
-            ],
-            Self::WriteLn => vec![Parameter::new(Token::new(
-                TokenType::Identifier,
-                "value".to_string(),
-                None,
-                Position::new("builtin".to_string(), 0),
-            ))],
-            Self::Readln => vec![Parameter::new(Token::new(
-                TokenType::Identifier,
-                "prompt".to_string(),
-                None,
-                Position::new("builtin".to_string(), 0),
-            ))],
-            Self::Pop => vec![Parameter::new(Token::new(
-                TokenType::Identifier,
-                "popable".to_string(),
-                None,
-                Position::new("builtin".to_string(), 0),
-            ))],
-            Self::Push => vec![
-                Parameter::new(Token::new(
-                    TokenType::Identifier,
-                    "pushable".to_string(),
-                    None,
-                    Position::new("builtin".to_string(), 0),
-                )),
-                Parameter::new(Token::new(
+            Self::Len => vec![Parameter::new(
+                Token::new(
                     TokenType::Identifier,
                     "value".to_string(),
                     None,
                     Position::new("builtin".to_string(), 0),
-                )),
+                ),
+                false,
+            )],
+            Self::First => vec![Parameter::new(
+                Token::new(
+                    TokenType::Identifier,
+                    "value".to_string(),
+                    None,
+                    Position::new("builtin".to_string(), 0),
+                ),
+                false,
+            )],
+            Self::Last => vec![Parameter::new(
+                Token::new(
+                    TokenType::Identifier,
+                    "value".to_string(),
+                    None,
+                    Position::new("builtin".to_string(), 0),
+                ),
+                false,
+            )],
+            Self::Write => vec![Parameter::new(
+                Token::new(
+                    TokenType::Identifier,
+                    "value".to_string(),
+                    None,
+                    Position::new("builtin".to_string(), 0),
+                ),
+                true,
+            )],
+            Self::Format => vec![
+                Parameter::new(
+                    Token::new(
+                        TokenType::Identifier,
+                        "format".to_string(),
+                        None,
+                        Position::new("builtin".to_string(), 0),
+                    ),
+                    false,
+                ),
+                Parameter::new(
+                    Token::new(
+                        TokenType::Identifier,
+                        "args".to_string(),
+                        None,
+                        Position::new("builtin".to_string(), 0),
+                    ),
+                    true,
+                ),
+            ],
+            Self::WriteLn => vec![Parameter::new(
+                Token::new(
+                    TokenType::Identifier,
+                    "value".to_string(),
+                    None,
+                    Position::new("builtin".to_string(), 0),
+                ),
+                true,
+            )],
+            Self::Readln => vec![Parameter::new(
+                Token::new(
+                    TokenType::Identifier,
+                    "prompt".to_string(),
+                    None,
+                    Position::new("builtin".to_string(), 0),
+                ),
+                false,
+            )],
+            Self::Pop => vec![Parameter::new(
+                Token::new(
+                    TokenType::Identifier,
+                    "popable".to_string(),
+                    None,
+                    Position::new("builtin".to_string(), 0),
+                ),
+                false,
+            )],
+            Self::Push => vec![
+                Parameter::new(
+                    Token::new(
+                        TokenType::Identifier,
+                        "pushable".to_string(),
+                        None,
+                        Position::new("builtin".to_string(), 0),
+                    ),
+                    false,
+                ),
+                Parameter::new(
+                    Token::new(
+                        TokenType::Identifier,
+                        "value".to_string(),
+                        None,
+                        Position::new("builtin".to_string(), 0),
+                    ),
+                    false,
+                ),
             ],
         }
     }

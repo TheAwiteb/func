@@ -84,11 +84,15 @@ impl IfExpression {
 #[derive(Debug, Clone)]
 pub struct Parameter {
     pub identifier: Token,
+    pub is_pack: bool,
 }
 
 impl Parameter {
-    pub fn new(identifier: Token) -> Self {
-        Self { identifier }
+    pub fn new(identifier: Token, is_pack: bool) -> Self {
+        Self {
+            identifier,
+            is_pack,
+        }
     }
 }
 
